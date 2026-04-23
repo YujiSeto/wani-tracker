@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/*
+ * Override the built-in `dark` variant so that dark: utilities activate when
+ * an ancestor element carries the `.dark` class (class-based dark mode).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Custom design tokens ──────────────────────────────────────────────────── */
+@theme {
+  /* WaniKani brand palette */
+  --color-wk-pink: #e8006f;
+  --color-wk-blue: #00aaff;
+  --color-wk-purple: #9b4dca;
+  --color-wk-gold: #ffd700;
+
+  /* Typography */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ── Base styles ───────────────────────────────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-geist-sans, system-ui, sans-serif);
+  /* Smooth theme transitions without janky repaints */
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* ── Focus ring ────────────────────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #e8006f;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
