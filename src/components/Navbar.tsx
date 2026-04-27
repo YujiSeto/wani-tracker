@@ -70,13 +70,13 @@ export function Navbar() {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 transition-colors duration-300"
+      className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-3 sm:px-6 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 transition-colors duration-300"
       aria-label="Main navigation"
     >
       {/* Logo */}
       <Link
         href="/"
-        className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wk-pink rounded-lg"
+        className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wk-pink rounded-lg shrink-0"
         aria-label="WaniTracker home"
       >
         <Image 
@@ -95,13 +95,13 @@ export function Navbar() {
           className="hidden dark:block drop-shadow-md transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110" 
           priority 
         />
-        <span className="text-xl font-black tracking-tight text-gray-900 dark:text-white drop-shadow-sm select-none">
+        <span className="hidden min-[450px]:block text-xl font-black tracking-tight text-gray-900 dark:text-white drop-shadow-sm select-none">
           WaniTracker
         </span>
       </Link>
 
       {/* Nav links */}
-      <div className="hidden sm:flex items-center gap-1 text-sm font-semibold">
+      <div className="hidden lg:flex items-center gap-1 text-sm font-semibold">
         <Link
           href="/data"
           className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-white/80 dark:hover:text-white dark:hover:bg-white/15 px-3 py-1.5 rounded-lg transition-all duration-150"
@@ -132,10 +132,10 @@ export function Navbar() {
 
 
       {/* Controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Locale switcher */}
         <div
-          className="flex items-center bg-gray-100 dark:bg-white/10 rounded-full p-1 gap-0.5 border border-gray-200 dark:border-white/20"
+          className="flex items-center bg-gray-100 dark:bg-white/10 rounded-full p-0.5 sm:p-1 gap-0.5 border border-gray-200 dark:border-white/20"
           role="group"
           aria-label="Language selector"
         >
@@ -146,7 +146,7 @@ export function Navbar() {
               onClick={() => setLocale(code)}
               aria-pressed={locale === code}
               aria-label={`Switch language to ${label}`}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
+              className={`px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold transition-all duration-200 ${
                 locale === code
                   ? 'bg-white dark:bg-white text-wk-pink shadow-sm'
                   : 'text-gray-500 hover:text-gray-900 dark:text-white/80 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/20'
@@ -164,7 +164,7 @@ export function Navbar() {
           aria-label={
             theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
           }
-          className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 border border-gray-200 dark:border-white/20 flex items-center justify-center text-gray-700 dark:text-white transition-all duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wk-pink"
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 border border-gray-200 dark:border-white/20 flex items-center justify-center text-gray-700 dark:text-white transition-all duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wk-pink"
         >
           {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
         </button>

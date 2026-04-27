@@ -84,16 +84,16 @@ export function DashboardClient({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 w-full sm:w-auto"
           >
             ← {t(locale, 'dash.backHome')}
           </Link>
           <Link
             href="/data/search"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 w-full sm:w-auto"
           >
             🔍 {t(locale, 'search.title')}
           </Link>
@@ -102,7 +102,7 @@ export function DashboardClient({
             target="_blank"
             rel="noopener noreferrer"
             id="view-ai-page-btn"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-wk-purple text-white text-sm font-bold hover:opacity-90 transition-all duration-200 hover:scale-105 shadow-lg shadow-purple-500/20"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-wk-purple text-white text-sm font-bold hover:opacity-90 transition-all duration-200 hover:scale-105 shadow-lg shadow-purple-500/20 w-full sm:w-auto"
           >
             🤖 {t(locale, 'dash.viewAI')}
           </Link>
@@ -125,50 +125,40 @@ export function DashboardClient({
         </div>
       )}
 
-      {/* ── User cards ────────────────────────────────────────────────────────── */}
-      <section aria-label="User information">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <DashboardCard
-            label={t(locale, 'dash.username')}
-            value={user.username}
-            icon="👤"
-            accent="pink"
-          />
-          <DashboardCard
-            label={t(locale, 'dash.level')}
-            value={user.level}
-            icon="🎌"
-            accent="blue"
-            description="WaniKani Level"
-          />
-          <DashboardCard
-            label={t(locale, 'dash.subscription')}
-            value={
-              user.subscription.active
-                ? t(locale, 'dash.subscription.active')
-                : t(locale, 'dash.subscription.inactive')
-            }
-            icon={user.subscription.active ? '✅' : '❌'}
-            accent={user.subscription.active ? 'green' : 'gray'}
-            description={user.subscription.type}
-          />
-        </div>
-      </section>
-
-      {/* ── Study queue ───────────────────────────────────────────────────────── */}
-      <section aria-label="Study statistics">
+      {/* ── Overview ──────────────────────────────────────────────────────────── */}
+      <section aria-label="Dashboard overview">
         {isFetchError(summaryResult) ? (
-          <ErrorCard
-            title={t(locale, 'error.title')}
-            message={
-              summaryResult.type === 'no_token'
-                ? t(locale, 'error.noToken')
-                : t(locale, 'error.fetchFailed')
-            }
-            hint={t(locale, 'error.retry')}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <DashboardCard
+              label={t(locale, 'dash.username')}
+              value={user.username}
+              icon="👤"
+              accent="pink"
+            />
+            <DashboardCard
+              label={t(locale, 'dash.subscription')}
+              value={
+                user.subscription.active
+                  ? t(locale, 'dash.subscription.active')
+                  : t(locale, 'dash.subscription.inactive')
+              }
+              icon={user.subscription.active ? '✅' : '❌'}
+              accent={user.subscription.active ? 'green' : 'gray'}
+              description={user.subscription.type}
+            />
+            <ErrorCard
+              title={t(locale, 'dash.stats')}
+              message={summaryResult.message}
+            />
+          </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <DashboardCard
+              label={t(locale, 'dash.username')}
+              value={user.username}
+              icon="👤"
+              accent="pink"
+            />
             <DashboardCard
               label={t(locale, 'dash.lessons')}
               value={lessonsCount}
@@ -180,6 +170,17 @@ export function DashboardClient({
               value={reviewsCount}
               icon="🔁"
               accent="gold"
+            />
+            <DashboardCard
+              label={t(locale, 'dash.subscription')}
+              value={
+                user.subscription.active
+                  ? t(locale, 'dash.subscription.active')
+                  : t(locale, 'dash.subscription.inactive')
+              }
+              icon={user.subscription.active ? '✅' : '❌'}
+              accent={user.subscription.active ? 'green' : 'gray'}
+              description={user.subscription.type}
             />
           </div>
         )}
@@ -225,7 +226,7 @@ export function DashboardClient({
                   className="text-2xl font-black font-mono tabular-nums"
                   style={{ color }}
                 >
-                  {subjectCounts[key].toLocaleString()}
+                  {subjectCounts[key].toLocaleString('en-US')}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {label}
@@ -235,7 +236,7 @@ export function DashboardClient({
             <div className="rounded-xl p-4 text-center border border-gray-200 dark:border-white/10 bg-white/60 dark:bg-white/5">
               <div className="text-2xl mb-1">📊</div>
               <div className="text-2xl font-black font-mono tabular-nums text-gray-700 dark:text-gray-200">
-                {subjectCounts.total.toLocaleString()}
+                {subjectCounts.total.toLocaleString('en-US')}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {t(locale, 'subjects.total')}
@@ -247,17 +248,9 @@ export function DashboardClient({
 
       {/* ── Level Progression ─────────────────────────────────────────────────── */}
       <section aria-label="Level progression history">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            {t(locale, 'levels.title')}
-          </h2>
-          <Link
-            href="/data/search"
-            className="text-sm text-wk-pink hover:underline"
-          >
-            🔍 {t(locale, 'search.title')}
-          </Link>
-        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          {t(locale, 'levels.title')}
+        </h2>
         <LevelProgressionTable
           rows={levelProgressions}
           currentLevel={user.level}
@@ -285,8 +278,8 @@ export function DashboardClient({
             description={resets.length === 0 ? t(locale, 'resets.none') : undefined}
           />
           <DashboardCard
-            label="Vacation"
-            value={user.current_vacation_started_at ? '🏖️ Active' : 'Inactive'}
+            label={t(locale, 'dash.vacation')}
+            value={user.current_vacation_started_at ? t(locale, 'dash.vacation.active') : t(locale, 'dash.vacation.inactive')}
             icon="📅"
             accent={user.current_vacation_started_at ? 'gold' : 'gray'}
           />

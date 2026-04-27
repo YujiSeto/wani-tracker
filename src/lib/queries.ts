@@ -205,10 +205,83 @@ export async function getStudyMaterialsCount(userId: string): Promise<number> {
 // ─── Subject search ───────────────────────────────────────────────────────────
 
 /**
+ * Minimal romaji → hiragana converter using a greedy syllabic parser.
+ * Consumes the longest matching romaji token at each position so that
+ * e.g. "hito" correctly becomes "ひと" rather than "hいtお".
+ * Handles standard Hepburn romanization for WaniKani reading searches.
+ */
+function romajiToHiragana(str: string): string {
+  const TABLE: Record<string, string> = {
+    // 3-char digraphs first (longest match wins)
+    shi:'し', chi:'ち', tsu:'つ', sha:'しゃ', shu:'しゅ', sho:'しょ',
+    cha:'ちゃ', chu:'ちゅ', cho:'ちょ', tchi:'っち',
+    kya:'きゃ', kyu:'きゅ', kyo:'きょ',
+    nya:'にゃ', nyu:'にゅ', nyo:'にょ',
+    mya:'みゃ', myu:'みゅ', myo:'みょ',
+    rya:'りゃ', ryu:'りゅ', ryo:'りょ',
+    hya:'ひゃ', hyu:'ひゅ', hyo:'ひょ',
+    bya:'びゃ', byu:'びゅ', byo:'びょ',
+    pya:'ぴゃ', pyu:'ぴゅ', pyo:'ぴょ',
+    // 2-char syllables
+    ka:'か', ki:'き', ku:'く', ke:'け', ko:'こ',
+    sa:'さ', si:'し', su:'す', se:'せ', so:'そ',
+    ta:'た', ti:'ち', te:'て', to:'と',
+    na:'な', ni:'に', nu:'ぬ', ne:'ね', no:'の',
+    ha:'は', hi:'ひ', fu:'ふ', he:'へ', ho:'ほ',
+    ma:'ま', mi:'み', mu:'む', me:'め', mo:'も',
+    ya:'や', yu:'ゆ', yo:'よ',
+    ra:'ら', ri:'り', ru:'る', re:'れ', ro:'ろ',
+    wa:'わ', wi:'ゐ', we:'ゑ', wo:'を',
+    ba:'ば', bi:'び', bu:'ぶ', be:'べ', bo:'ぼ',
+    pa:'ぱ', pi:'ぴ', pu:'ぷ', pe:'ぺ', po:'ぽ',
+    da:'だ', di:'ぢ', du:'づ', de:'で', do:'ど',
+    ga:'が', gi:'ぎ', gu:'ぐ', ge:'げ', go:'ご',
+    za:'ざ', zi:'じ', zu:'ず', ze:'ぜ', zo:'ぞ',
+    ja:'じゃ', ji:'じ', ju:'じゅ', jo:'じょ',
+    // single vowels
+    a:'あ', i:'い', u:'う', e:'え', o:'お',
+    // n
+    n:'ん',
+  };
+
+  const s = str.toLowerCase();
+  let result = '';
+  let pos = 0;
+  while (pos < s.length) {
+    // Try longest match first (4, 3, 2, 1)
+    let matched = false;
+    for (const len of [4, 3, 2, 1]) {
+      const token = s.slice(pos, pos + len);
+      if (TABLE[token]) {
+        // For bare 'n': don't consume if followed by a vowel or 'y' (it's part of a syllable)
+        if (token === 'n' && pos + 1 < s.length && /[aeiouy]/.test(s[pos + 1])) break;
+        result += TABLE[token];
+        pos += len;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      // Double consonant → っ (e.g. kk, tt, pp, ss)
+      if (pos + 1 < s.length && s[pos] === s[pos + 1] && /[ktsphbdgzcrm]/.test(s[pos])) {
+        result += 'っ';
+        pos++;
+      } else {
+        result += s[pos];
+        pos++;
+      }
+    }
+  }
+  return result;
+}
+
+
+/**
  * Searches subjects by:
- *   - slug (romanized English, e.g. "person", "water")
+ *   - slug (romanized English for radicals, e.g. "person", "water")
  *   - characters (Japanese, e.g. "人", "水道")
  *   - meaning inside data JSONB (covers synonyms)
+ *   - reading inside data JSONB in hiragana (romaji query converted first)
  *
  * Results are ordered: kanji first, then vocabulary/kana_vocabulary, then radical.
  * This prevents the LIMIT from being filled entirely by radicals (which have lower IDs).
@@ -219,6 +292,10 @@ export async function searchSubjects(
 ): Promise<SubjectSearchResult[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
+
+  // Convert romaji input to hiragana to support reading-based searches (e.g. "hito" → "ひと")
+  const hiragana = romajiToHiragana(trimmed);
+  const readingPattern = '%' + hiragana + '%';
 
   // Priority sort: kanji=1, vocabulary/kana_vocabulary=2, radical=3
   const typePriority = sql<number>`
@@ -256,10 +333,15 @@ export async function searchSubjects(
       or(
         ilike(subjects.slug, `%${trimmed}%`),
         ilike(subjects.characters, `%${trimmed}%`),
-        // Also search meanings inside JSONB data
+        // Search meanings inside JSONB data
         sql`exists (
           select 1 from jsonb_array_elements(${subjects.data}->'meanings') m
           where m->>'meaning' ilike ${'%' + trimmed + '%'}
+        )`,
+        // Search readings inside JSONB data (romaji converted to hiragana)
+        sql`exists (
+          select 1 from jsonb_array_elements(${subjects.data}->'readings') r
+          where r->>'reading' ilike ${readingPattern}
         )`,
       ),
     )
