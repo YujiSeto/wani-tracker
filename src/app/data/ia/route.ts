@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-
-export const revalidate = 60;
 import {
   fetchUser,
   fetchSummary,
@@ -8,6 +6,8 @@ import {
   countAvailable,
 } from '@/lib/wanikani';
 import { getAdminUser, getBurnedItems } from '@/lib/queries';
+
+export const revalidate = 60;
 
 export async function GET() {
   const [userResult, summaryResult, adminUser] = await Promise.all([
