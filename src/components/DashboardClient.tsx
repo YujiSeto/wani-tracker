@@ -286,7 +286,7 @@ export function DashboardClient({
           />
           <DashboardCard
             label="Vacation"
-            value={user.current_vacation_started_at ? '🏖️ Active' : '❌ Inactive'}
+            value={user.current_vacation_started_at ? '🏖️ Active' : 'Inactive'}
             icon="📅"
             accent={user.current_vacation_started_at ? 'gold' : 'gray'}
           />
