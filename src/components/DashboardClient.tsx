@@ -73,14 +73,40 @@ export function DashboardClient({
 
   return (
     <div className="space-y-12">
-      {/* Page heading */}
-      <div>
-        <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-1">
-          {t(locale, 'dash.title')}
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          {t(locale, 'dash.subtitle')}
-        </p>
+      {/* Page heading & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-1">
+            {t(locale, 'dash.title')}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            {t(locale, 'dash.subtitle')}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+          >
+            ← {t(locale, 'dash.backHome')}
+          </Link>
+          <Link
+            href="/data/search"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+          >
+            🔍 {t(locale, 'search.title')}
+          </Link>
+          <Link
+            href="/data/ia"
+            target="_blank"
+            rel="noopener noreferrer"
+            id="view-ai-page-btn"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-wk-purple text-white text-sm font-bold hover:opacity-90 transition-all duration-200 hover:scale-105 shadow-lg shadow-purple-500/20"
+          >
+            🤖 {t(locale, 'dash.viewAI')}
+          </Link>
+        </div>
       </div>
 
       {/* Sync required banner */}
@@ -260,35 +286,13 @@ export function DashboardClient({
           />
           <DashboardCard
             label="Vacation"
-            value={user.current_vacation_started_at ? '🏖️ On vacation' : '✅ Active'}
+            value={user.current_vacation_started_at ? '🏖️ Active' : '❌ Inactive'}
             icon="📅"
-            accent={user.current_vacation_started_at ? 'gray' : 'green'}
+            accent={user.current_vacation_started_at ? 'gold' : 'gray'}
           />
         </div>
       </section>
 
-      {/* ── Actions ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-3 pt-2">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
-        >
-          ← {t(locale, 'dash.backHome')}
-        </Link>
-        <Link
-          href="/data/search"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
-        >
-          🔍 {t(locale, 'search.title')}
-        </Link>
-        <Link
-          href="/data/ia"
-          id="view-ai-page-btn"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-wk-purple text-white text-sm font-bold hover:opacity-90 transition-all duration-200 hover:scale-105 shadow-lg shadow-purple-500/20"
-        >
-          🤖 {t(locale, 'dash.viewAI')}
-        </Link>
-      </div>
     </div>
   );
 }
