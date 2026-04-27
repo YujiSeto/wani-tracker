@@ -122,6 +122,8 @@ export function Navbar() {
         </Link>
         <Link
           href="/data/ia"
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-white/80 dark:hover:text-white dark:hover:bg-white/15 px-3 py-1.5 rounded-lg transition-all duration-150"
         >
           {t(locale, 'nav.ai')}
