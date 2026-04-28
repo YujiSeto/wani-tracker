@@ -210,40 +210,40 @@ export async function getStudyMaterialsCount(userId: string): Promise<number> {
  * e.g. "hito" correctly becomes "ひと" rather than "hいtお".
  * Handles standard Hepburn romanization for WaniKani reading searches.
  */
-function romajiToHiragana(str: string): string {
-  const TABLE: Record<string, string> = {
-    // 3-char digraphs first (longest match wins)
-    shi:'し', chi:'ち', tsu:'つ', sha:'しゃ', shu:'しゅ', sho:'しょ',
-    cha:'ちゃ', chu:'ちゅ', cho:'ちょ', tchi:'っち',
-    kya:'きゃ', kyu:'きゅ', kyo:'きょ',
-    nya:'にゃ', nyu:'にゅ', nyo:'にょ',
-    mya:'みゃ', myu:'みゅ', myo:'みょ',
-    rya:'りゃ', ryu:'りゅ', ryo:'りょ',
-    hya:'ひゃ', hyu:'ひゅ', hyo:'ひょ',
-    bya:'びゃ', byu:'びゅ', byo:'びょ',
-    pya:'ぴゃ', pyu:'ぴゅ', pyo:'ぴょ',
-    // 2-char syllables
-    ka:'か', ki:'き', ku:'く', ke:'け', ko:'こ',
-    sa:'さ', si:'し', su:'す', se:'せ', so:'そ',
-    ta:'た', ti:'ち', te:'て', to:'と',
-    na:'な', ni:'に', nu:'ぬ', ne:'ね', no:'の',
-    ha:'は', hi:'ひ', fu:'ふ', he:'へ', ho:'ほ',
-    ma:'ま', mi:'み', mu:'む', me:'め', mo:'も',
-    ya:'や', yu:'ゆ', yo:'よ',
-    ra:'ら', ri:'り', ru:'る', re:'れ', ro:'ろ',
-    wa:'わ', wi:'ゐ', we:'ゑ', wo:'を',
-    ba:'ば', bi:'び', bu:'ぶ', be:'べ', bo:'ぼ',
-    pa:'ぱ', pi:'ぴ', pu:'ぷ', pe:'ぺ', po:'ぽ',
-    da:'だ', di:'ぢ', du:'づ', de:'で', do:'ど',
-    ga:'が', gi:'ぎ', gu:'ぐ', ge:'げ', go:'ご',
-    za:'ざ', zi:'じ', zu:'ず', ze:'ぜ', zo:'ぞ',
-    ja:'じゃ', ji:'じ', ju:'じゅ', jo:'じょ',
-    // single vowels
-    a:'あ', i:'い', u:'う', e:'え', o:'お',
-    // n
-    n:'ん',
-  };
+const ROMAJI_TO_HIRAGANA_TABLE: Record<string, string> = {
+  // 3-char digraphs first (longest match wins)
+  shi:'し', chi:'ち', tsu:'つ', sha:'しゃ', shu:'しゅ', sho:'しょ',
+  cha:'ちゃ', chu:'ちゅ', cho:'ちょ', tchi:'っち',
+  kya:'きゃ', kyu:'きゅ', kyo:'きょ',
+  nya:'にゃ', nyu:'にゅ', nyo:'にょ',
+  mya:'みゃ', myu:'みゅ', myo:'みょ',
+  rya:'りゃ', ryu:'りゅ', ryo:'りょ',
+  hya:'ひゃ', hyu:'ひゅ', hyo:'ひょ',
+  bya:'びゃ', byu:'びゅ', byo:'びょ',
+  pya:'ぴゃ', pyu:'ぴゅ', pyo:'ぴょ',
+  // 2-char syllables
+  ka:'か', ki:'き', ku:'く', ke:'け', ko:'こ',
+  sa:'さ', si:'し', su:'す', se:'せ', so:'そ',
+  ta:'た', ti:'ち', te:'て', to:'と',
+  na:'な', ni:'に', nu:'ぬ', ne:'ね', no:'の',
+  ha:'は', hi:'ひ', fu:'ふ', he:'へ', ho:'ほ',
+  ma:'ま', mi:'み', mu:'む', me:'め', mo:'も',
+  ya:'や', yu:'ゆ', yo:'よ',
+  ra:'ら', ri:'り', ru:'る', re:'れ', ro:'ろ',
+  wa:'わ', wi:'ゐ', we:'ゑ', wo:'を',
+  ba:'ば', bi:'び', bu:'ぶ', be:'べ', bo:'ぼ',
+  pa:'ぱ', pi:'ぴ', pu:'ぷ', pe:'ぺ', po:'ぽ',
+  da:'だ', di:'ぢ', du:'づ', de:'で', do:'ど',
+  ga:'が', gi:'ぎ', gu:'ぐ', ge:'げ', go:'ご',
+  za:'ざ', zi:'じ', zu:'ず', ze:'ぜ', zo:'ぞ',
+  ja:'じゃ', ji:'じ', ju:'じゅ', jo:'じょ',
+  // single vowels
+  a:'あ', i:'い', u:'う', e:'え', o:'お',
+  // n
+  n:'ん',
+};
 
+function romajiToHiragana(str: string): string {
   const s = str.toLowerCase();
   let result = '';
   let pos = 0;
@@ -252,10 +252,10 @@ function romajiToHiragana(str: string): string {
     let matched = false;
     for (const len of [4, 3, 2, 1]) {
       const token = s.slice(pos, pos + len);
-      if (TABLE[token]) {
+      if (ROMAJI_TO_HIRAGANA_TABLE[token]) {
         // For bare 'n': don't consume if followed by a vowel or 'y' (it's part of a syllable)
         if (token === 'n' && pos + 1 < s.length && /[aeiouy]/.test(s[pos + 1])) break;
-        result += TABLE[token];
+        result += ROMAJI_TO_HIRAGANA_TABLE[token];
         pos += len;
         matched = true;
         break;

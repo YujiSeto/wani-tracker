@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useLocale } from '@/components/LocaleProvider';
 import { t } from '@/lib/translations';
 import { srsColor, srsLabelKey } from '@/lib/srsUtils';
@@ -132,6 +133,7 @@ interface Props {
 
 export function SearchClient({ q, results, hasAdmin }: Props) {
   const { locale } = useLocale();
+  const router = useRouter();
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6 sm:space-y-8">
@@ -146,7 +148,15 @@ export function SearchClient({ q, results, hasAdmin }: Props) {
       </div>
 
       {/* Search form */}
-      <form method="GET" className="flex flex-col sm:flex-row gap-3">
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.currentTarget);
+          const query = formData.get('q') as string;
+          router.push(`/data/search?q=${encodeURIComponent(query)}`);
+        }}
+        className="flex flex-col sm:flex-row gap-3"
+      >
         <input
           id="search-input"
           name="q"
