@@ -45,6 +45,7 @@ export function DashboardClient({
   studyMaterialsCount,
 }: DashboardClientProps) {
   const { locale } = useLocale();
+  const localeTag = locale === 'ja' ? 'ja-JP' : locale === 'pt' ? 'pt-BR' : 'en-US';
 
   // ── User error ──────────────────────────────────────────────────────────────
   if (isFetchError(userResult)) {
@@ -148,7 +149,11 @@ export function DashboardClient({
             />
             <ErrorCard
               title={t(locale, 'dash.stats')}
-              message={summaryResult.message}
+              message={
+                summaryResult.type === 'no_token'
+                  ? t(locale, 'error.noToken')
+                  : t(locale, 'error.fetchFailed')
+              }
             />
           </div>
         ) : (
@@ -226,7 +231,7 @@ export function DashboardClient({
                   className="text-2xl font-black font-mono tabular-nums"
                   style={{ color }}
                 >
-                  {subjectCounts[key].toLocaleString('en-US')}
+                  {subjectCounts[key].toLocaleString(localeTag)}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {label}
@@ -236,7 +241,7 @@ export function DashboardClient({
             <div className="rounded-xl p-4 text-center border border-gray-200 dark:border-white/10 bg-white/60 dark:bg-white/5">
               <div className="text-2xl mb-1">📊</div>
               <div className="text-2xl font-black font-mono tabular-nums text-gray-700 dark:text-gray-200">
-                {subjectCounts.total.toLocaleString('en-US')}
+                {subjectCounts.total.toLocaleString(localeTag)}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {t(locale, 'subjects.total')}
