@@ -7,7 +7,8 @@ import {
 } from '@/lib/wanikani';
 import { getAdminUser, getBurnedItems } from '@/lib/queries';
 
-export const revalidate = 60;
+// Revalidate AI data every 15 minutes to save bandwidth.
+export const revalidate = 900;
 
 export async function GET() {
   const [userResult, summaryResult, adminUser] = await Promise.all([
