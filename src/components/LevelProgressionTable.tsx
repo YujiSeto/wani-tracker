@@ -47,8 +47,7 @@ function getSpeedInfo(days: number, isPassed: boolean, isCurrent: boolean) {
 }
 
 export function LevelProgressionTable({ rows, currentLevel }: Props) {
-  const { locale } = useLocale();
-  const localeTag = locale === 'ja' ? 'ja-JP' : locale === 'pt' ? 'pt-BR' : 'en-US';
+  const { locale, localeTag } = useLocale();
   const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
 
   if (rows.length === 0) {

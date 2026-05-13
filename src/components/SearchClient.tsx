@@ -25,8 +25,7 @@ function fmt(d: Date | string | null, localeTag: string): string {
 }
 
 function ResultCard({ r }: { r: SubjectSearchResult }) {
-  const { locale } = useLocale();
-  const localeTag = locale === 'ja' ? 'ja-JP' : locale === 'pt' ? 'pt-BR' : 'en-US';
+  const { locale, localeTag } = useLocale();
   const srsStage = r.srs_stage;
   const srsColorHex = srsColor(srsStage);
   const srsLabel = t(locale, srsLabelKey(srsStage));
@@ -152,8 +151,10 @@ export function SearchClient({ q, results, hasAdmin }: Props) {
         onSubmit={(e) => {
           e.preventDefault();
           const formData = new FormData(e.currentTarget);
-          const query = formData.get('q') as string;
-          router.push(`/data/search?q=${encodeURIComponent(query)}`);
+          const query = formData.get('q');
+          if (typeof query === 'string') {
+            router.push(`/data/search?q=${encodeURIComponent(query)}`);
+          }
         }}
         className="flex flex-col sm:flex-row gap-3"
       >

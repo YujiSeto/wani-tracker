@@ -78,7 +78,7 @@ const translations = {
     'srs.kanji': 'Kanji',
     'srs.vocab': 'Vocabulary',
     'srs.total': 'Total',
-    'srs.noData': 'No SRS data yet — run the initial sync first.',
+    'srs.noData': 'No SRS data yet — run the manual one-time sync first.',
 
     // Level Progressions
     'levels.title': 'Level Progression',
@@ -140,7 +140,7 @@ const translations = {
     'search.dbNotSynced': 'Database not synced yet — run /api/sync/full first.',
 
     // Sync banner
-    'sync.notSynced': 'Database not synced yet. Trigger /api/sync/full to import data.',
+    'sync.notSynced': 'Database not synced yet. Run /api/sync/full ONCE manually to import data.',
     'sync.lastSynced': 'Last synced',
   },
 
@@ -221,7 +221,7 @@ const translations = {
     'srs.kanji': 'Kanji',
     'srs.vocab': 'Vocabulário',
     'srs.total': 'Total',
-    'srs.noData': 'Sem dados SRS ainda — execute a sincronização inicial.',
+    'srs.noData': 'Sem dados SRS ainda — execute a sincronização manual inicial.',
 
     // Level Progressions
     'levels.title': 'Progressão de Níveis',
@@ -283,7 +283,7 @@ const translations = {
     'search.dbNotSynced': 'Banco de dados não sincronizado — rode /api/sync/full primeiro.',
 
     // Sync banner
-    'sync.notSynced': 'Banco de dados não sincronizado. Acesse /api/sync/full para importar.',
+    'sync.notSynced': 'Banco de dados não sincronizado. Acesse /api/sync/full MANUALMENTE UMA VEZ.',
     'sync.lastSynced': 'Última sinc.',
   },
 

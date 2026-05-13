@@ -44,8 +44,7 @@ export function DashboardClient({
   resets,
   studyMaterialsCount,
 }: DashboardClientProps) {
-  const { locale } = useLocale();
-  const localeTag = locale === 'ja' ? 'ja-JP' : locale === 'pt' ? 'pt-BR' : 'en-US';
+  const { locale, localeTag } = useLocale();
 
   // ── User error ──────────────────────────────────────────────────────────────
   if (isFetchError(userResult)) {
@@ -114,14 +113,37 @@ export function DashboardClient({
       {syncRequired && (
         <div
           role="alert"
-          className="flex items-start gap-3 px-5 py-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300 text-sm"
+          className="flex items-start gap-4 px-6 py-5 rounded-2xl border border-yellow-500/30 bg-yellow-500/5 text-yellow-800 dark:text-yellow-200 shadow-lg shadow-yellow-500/5"
         >
-          <span className="text-xl">⚠️</span>
-          <div>
-            <p className="font-semibold">{t(locale, 'sync.notSynced')}</p>
-            <code className="text-xs opacity-70 mt-1 block">
-              curl -H &quot;Authorization: Bearer $CRON_SECRET&quot; /api/sync/full
-            </code>
+          <span className="text-2xl mt-0.5">⚠️</span>
+          <div className="space-y-3">
+            <div>
+              <p className="font-bold text-lg">{t(locale, 'sync.notSynced')}</p>
+              <p className="text-sm opacity-80 mt-1">
+                Your database is empty. You need to perform a **one-time** initial import.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wider opacity-60">
+                1. Initial Import (Run manually ONCE)
+              </p>
+              <code className="text-[11px] font-mono bg-black/5 dark:bg-white/5 p-3 rounded-lg block border border-black/5 dark:border-white/5 overflow-x-auto whitespace-pre">
+                curl -H &quot;Authorization: Bearer $CRON_SECRET&quot; /api/sync/full
+              </code>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wider opacity-60">
+                2. Daily Updates (Set up in cron-job.org)
+              </p>
+              <p className="text-xs opacity-80">
+                Use this lighter URL for your scheduled cron jobs to save bandwidth:
+              </p>
+              <code className="text-[11px] font-mono bg-black/5 dark:bg-white/5 p-3 rounded-lg block border border-black/5 dark:border-white/5 overflow-x-auto whitespace-pre">
+                /api/sync
+              </code>
+            </div>
           </div>
         </div>
       )}

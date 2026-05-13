@@ -210,7 +210,7 @@ export async function getStudyMaterialsCount(userId: string): Promise<number> {
  * e.g. "hito" correctly becomes "ひと" rather than "hいtお".
  * Handles standard Hepburn romanization for WaniKani reading searches.
  */
-const ROMAJI_TO_HIRAGANA_TABLE: Record<string, string> = {
+const ROMAJI_TO_HIRAGANA_TABLE: Record<string, string> = Object.assign(Object.create(null), {
   // 3-char digraphs first (longest match wins)
   shi:'し', chi:'ち', tsu:'つ', sha:'しゃ', shu:'しゅ', sho:'しょ',
   cha:'ちゃ', chu:'ちゅ', cho:'ちょ', tchi:'っち',
@@ -241,7 +241,7 @@ const ROMAJI_TO_HIRAGANA_TABLE: Record<string, string> = {
   a:'あ', i:'い', u:'う', e:'え', o:'お',
   // n
   n:'ん',
-};
+});
 
 function romajiToHiragana(str: string): string {
   const s = str.toLowerCase();
@@ -252,10 +252,11 @@ function romajiToHiragana(str: string): string {
     let matched = false;
     for (const len of [4, 3, 2, 1]) {
       const token = s.slice(pos, pos + len);
-      if (ROMAJI_TO_HIRAGANA_TABLE[token]) {
+      const match = ROMAJI_TO_HIRAGANA_TABLE[token];
+      if (typeof match === 'string') {
         // For bare 'n': don't consume if followed by a vowel or 'y' (it's part of a syllable)
         if (token === 'n' && pos + 1 < s.length && /[aeiouy]/.test(s[pos + 1])) break;
-        result += ROMAJI_TO_HIRAGANA_TABLE[token];
+        result += match;
         pos += len;
         matched = true;
         break;
@@ -306,6 +307,13 @@ export async function searchSubjects(
       else 3
     end`;
 
+  const primaryMeaningSql = sql<string | null>`(
+    SELECT m->>'meaning'
+    FROM jsonb_array_elements(${subjects.data}->'meanings') m
+    WHERE (m->>'primary')::boolean
+    LIMIT 1
+  )`;
+
   const rows = await db
     .select({
       id: subjects.id,
@@ -314,7 +322,7 @@ export async function searchSubjects(
       characters: subjects.characters,
       level: subjects.level,
       document_url: subjects.document_url,
-      data: subjects.data,
+      primaryMeaning: primaryMeaningSql,
       srs_stage: assignments.srs_stage,
       started_at: assignments.started_at,
       passed_at: assignments.passed_at,
@@ -348,28 +356,20 @@ export async function searchSubjects(
     .orderBy(typePriority, subjects.level, subjects.id)
     .limit(50);
 
-  return rows.map((r) => {
-    const data = r.data as {
-      meanings?: { meaning: string; primary: boolean }[];
-    } | null;
-    const primaryMeaning =
-      data?.meanings?.find((m) => m.primary)?.meaning ?? null;
-
-    return {
-      id: r.id,
-      object: r.object,
-      slug: r.slug,
-      characters: r.characters,
-      level: r.level,
-      document_url: r.document_url,
-      srs_stage: r.srs_stage ?? null,
-      started_at: r.started_at ?? null,
-      passed_at: r.passed_at ?? null,
-      burned_at: r.burned_at ?? null,
-      available_at: r.available_at ?? null,
-      primaryMeaning,
-    };
-  });
+  return rows.map((r) => ({
+    id: r.id,
+    object: r.object,
+    slug: r.slug,
+    characters: r.characters,
+    level: r.level,
+    document_url: r.document_url,
+    srs_stage: r.srs_stage ?? null,
+    started_at: r.started_at ?? null,
+    passed_at: r.passed_at ?? null,
+    burned_at: r.burned_at ?? null,
+    available_at: r.available_at ?? null,
+    primaryMeaning: r.primaryMeaning,
+  }));
 }
 
 // ─── Level overview (all levels) ─────────────────────────────────────────────
@@ -438,6 +438,20 @@ export interface SubjectItem {
 }
 
 export async function getSubjectsByLevel(level: number, userId: string): Promise<SubjectItem[]> {
+  const primaryMeaningSql = sql<string | null>`(
+    SELECT m->>'meaning'
+    FROM jsonb_array_elements(${subjects.data}->'meanings') m
+    WHERE (m->>'primary')::boolean
+    LIMIT 1
+  )`;
+
+  const primaryReadingSql = sql<string | null>`(
+    SELECT r->>'reading'
+    FROM jsonb_array_elements(${subjects.data}->'readings') r
+    WHERE (r->>'primary')::boolean
+    LIMIT 1
+  )`;
+
   const rows = await db
     .select({
       id: subjects.id,
@@ -446,7 +460,8 @@ export async function getSubjectsByLevel(level: number, userId: string): Promise
       slug: subjects.slug,
       level: subjects.level,
       document_url: subjects.document_url,
-      data: subjects.data,
+      primaryMeaning: primaryMeaningSql,
+      primaryReading: primaryReadingSql,
       srs_stage: assignments.srs_stage,
     })
     .from(subjects)
@@ -457,23 +472,17 @@ export async function getSubjectsByLevel(level: number, userId: string): Promise
     .where(eq(subjects.level, level))
     .orderBy(subjects.object, subjects.id);
 
-  return rows.map((r) => {
-    const data = r.data as {
-      meanings?: { meaning: string; primary: boolean }[];
-      readings?: { reading: string; primary: boolean }[];
-    } | null;
-    return {
-      id: r.id,
-      object: r.object,
-      characters: r.characters,
-      slug: r.slug,
-      level: r.level,
-      documentUrl: r.document_url,
-      primaryMeaning: data?.meanings?.find((m) => m.primary)?.meaning ?? null,
-      primaryReading: data?.readings?.find((rd) => rd.primary)?.reading ?? null,
-      srs_stage: r.srs_stage ?? null,
-    };
-  });
+  return rows.map((r) => ({
+    id: r.id,
+    object: r.object,
+    characters: r.characters,
+    slug: r.slug,
+    level: r.level,
+    documentUrl: r.document_url,
+    primaryMeaning: r.primaryMeaning,
+    primaryReading: r.primaryReading,
+    srs_stage: r.srs_stage ?? null,
+  }));
 }
 
 // ─── AI Export (Burned items) ────────────────────────────────────────────────
@@ -490,6 +499,20 @@ export interface BurnedItem {
 }
 
 export async function getBurnedItems(userId: string): Promise<BurnedItem[]> {
+  const primaryMeaningSql = sql<string | null>`(
+    SELECT m->>'meaning'
+    FROM jsonb_array_elements(${subjects.data}->'meanings') m
+    WHERE (m->>'primary')::boolean
+    LIMIT 1
+  )`;
+
+  const primaryReadingSql = sql<string | null>`(
+    SELECT r->>'reading'
+    FROM jsonb_array_elements(${subjects.data}->'readings') r
+    WHERE (r->>'primary')::boolean
+    LIMIT 1
+  )`;
+
   const rows = await db
     .select({
       id: subjects.id,
@@ -497,7 +520,8 @@ export async function getBurnedItems(userId: string): Promise<BurnedItem[]> {
       level: subjects.level,
       slug: subjects.slug,
       characters: subjects.characters,
-      data: subjects.data,
+      primary_meaning: primaryMeaningSql,
+      primary_reading: primaryReadingSql,
       burned_at: assignments.burned_at,
     })
     .from(assignments)
@@ -511,21 +535,14 @@ export async function getBurnedItems(userId: string): Promise<BurnedItem[]> {
     )
     .orderBy(subjects.level, subjects.object, subjects.id);
 
-  return rows.map((r) => {
-    const data = r.data as {
-      meanings?: { meaning: string; primary: boolean }[];
-      readings?: { reading: string; primary: boolean }[];
-    } | null;
-
-    return {
-      id: r.id,
-      object: r.object,
-      level: r.level,
-      slug: r.slug,
-      characters: r.characters,
-      primary_meaning: data?.meanings?.find((m) => m.primary)?.meaning ?? null,
-      primary_reading: data?.readings?.find((rd) => rd.primary)?.reading ?? null,
-      burned_at: r.burned_at ?? null,
-    };
-  });
+  return rows.map((r) => ({
+    id: r.id,
+    object: r.object,
+    level: r.level,
+    slug: r.slug,
+    characters: r.characters,
+    primary_meaning: r.primary_meaning,
+    primary_reading: r.primary_reading,
+    burned_at: r.burned_at ?? null,
+  }));
 }
